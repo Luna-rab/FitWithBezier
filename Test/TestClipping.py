@@ -1,7 +1,5 @@
-import sys
-sys.path.append('../')
-from BezierSurface import BezierSurface
-from Line import Line3D
+from Bezier.BezierSurface import BezierSurface
+from Bezier.Line import Line3D
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D

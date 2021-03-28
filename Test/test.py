@@ -1,7 +1,5 @@
-import sys
-sys.path.append('../')
-import BezierCurve
-import Line
+from Bezier import BezierCurve
+from Bezier import Line
 import numpy as np
 import matplotlib.pyplot as plt
 

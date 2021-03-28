@@ -1,11 +1,11 @@
 from Bezier.BezierSurface import BezierSurface
 from Bezier.Line import Line3D
-from Shiori import CSFDataRaw
+from ExpData import CSFDataRaw
 import numpy as np
 import scipy.optimize as optimize
 
 def dist_z(surface, point):
-    L = Line3D(point, np.array([point[0], point[1], 0]))
+    L = Line3D(point, np.array([point[0], point[1], point[2]+1]))
     uv = surface.Clip(L)
     if len(uv) != 1:
         exit

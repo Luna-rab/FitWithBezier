@@ -111,8 +111,8 @@ class BezierPatch:
         for i in range(self.norder+1):
             for j in range(self.morder+1):
                 ud = np.append(ud, np.array([[float(i)/self.norder, L.dist2Point(self.d[i][j])]]), axis=0)
-                
-        try:
+
+        if isHull(ud):
             hull = ConvexHull(ud)
             hull_points = hull.points[hull.vertices]
             hull_points = np.append(hull_points, np.array([hull_points[0]]), axis=0)
@@ -144,12 +144,15 @@ class BezierPatch:
                 prev_hp = hp
             if u_max < u_min:
                 u_max, u_min = u_min, u_max
-        except scipy.spatial.qhull.QhullError:
+        else:
             u1 = ud[0][0]
             d1 = ud[0][1]
             u2 = ud[-1][0]
             d2 = ud[-1][1]
             u_max = u_min = (u1*d2 - u2*d1)/(d2 - d1)
+            u_max = min(u_max+1e-12, 1)
+            u_min = max(0, u_min-1e-12)
+
         if(u_max == 0):
             return None
 
@@ -198,7 +201,7 @@ class BezierPatch:
             for j in range(self.morder+1):
                 vd = np.append(vd, np.array([[float(j)/self.morder, L.dist2Point(self.d[i][j])]]), axis=0)
         
-        try:
+        if isHull(vd):
             hull = ConvexHull(vd)
             hull_points = hull.points[hull.vertices]
             hull_points = np.append(hull_points, np.array([hull_points[0]]), axis=0)
@@ -230,12 +233,14 @@ class BezierPatch:
                 prev_hp = hp
             if v_max < v_min:
                 v_max, v_min = v_min, v_max
-        except scipy.spatial.qhull.QhullError:
+        else:
             v1 = vd[0][0]
             d1 = vd[0][1]
             v2 = vd[-1][0]
             d2 = vd[-1][1]
             v_max = v_min = (v1*d2 - v2*d1)/(d2 - d1)
+            v_max = min(v_max+1e-12, 1)
+            v_min = max(0, v_min-1e-12)
         if(v_max == 0):
             return None
 
@@ -325,3 +330,15 @@ class BezierPatch:
         if len(Q) == 1:
             return [Q]
         return [Q] + self._de_casteljau_algorithm(Q, t)
+
+def isHull(d):
+    for i in range(1, d.shape[1]):
+        for j in range(i+1, d.shape[1]):
+            vec1 = d[i] - d[0]
+            vec2 = d[j] - d[0]
+            length1 = np.linalg.norm(vec1)
+            length2 = np.linalg.norm(vec2)
+            if np.dot(vec1, vec2) != length1*length2:
+                return True
+    return False
+
