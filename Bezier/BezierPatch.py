@@ -104,7 +104,7 @@ class BezierPatch:
         V1 = self.d[self.norder][self.morder] - self.d[self.norder][0]
         L = Line.Line2D(np.array([0,0]), V0+V1)
 
-        #self.Plot(self.getPlotColor()) #BezierPatchを描画 本番ではコメントアウト
+        self.Plot(self.getPlotColor()) #BezierPatchを描画 本番ではコメントアウト
         #self.PlotDetail(L)
 
         ud = np.empty([0,2],float)
@@ -112,7 +112,9 @@ class BezierPatch:
             for j in range(self.morder+1):
                 ud = np.append(ud, np.array([[float(i)/self.norder, L.dist2Point(self.d[i][j])]]), axis=0)
 
-        if isHull(ud):
+        if all(ud[:,1]>0) or all(ud[:,1]<0):
+            return None
+        elif isHull(ud):
             hull = ConvexHull(ud)
             hull_points = hull.points[hull.vertices]
             hull_points = np.append(hull_points, np.array([hull_points[0]]), axis=0)
@@ -150,11 +152,8 @@ class BezierPatch:
             u2 = ud[-1][0]
             d2 = ud[-1][1]
             u_max = u_min = (u1*d2 - u2*d1)/(d2 - d1)
-            u_max = min(u_max+1e-12, 1)
-            u_min = max(0, u_min-1e-12)
-
-        if(u_max == 0):
-            return None
+            u_max = min(u_max+1e-6, 1)
+            u_min = max(0, u_min-1e-6)
 
         #再帰を行う
         x0 = np.empty([0,2],float)
@@ -193,7 +192,7 @@ class BezierPatch:
         V1 = self.d[self.norder][self.morder] - self.d[0][self.morder]
         L = Line.Line2D(np.array([0,0]), V0+V1)
 
-        #self.Plot(self.getPlotColor()) #BezierPatchを描画 本番ではコメントアウト
+        self.Plot(self.getPlotColor()) #BezierPatchを描画 本番ではコメントアウト
         #self.PlotDetail(L)
 
         vd = np.empty([0,2],float)
@@ -201,7 +200,9 @@ class BezierPatch:
             for j in range(self.morder+1):
                 vd = np.append(vd, np.array([[float(j)/self.morder, L.dist2Point(self.d[i][j])]]), axis=0)
         
-        if isHull(vd):
+        if all(vd[:,1]>0) or all(vd[:,1]<0):
+            return None
+        elif isHull(vd):
             hull = ConvexHull(vd)
             hull_points = hull.points[hull.vertices]
             hull_points = np.append(hull_points, np.array([hull_points[0]]), axis=0)
@@ -239,10 +240,8 @@ class BezierPatch:
             v2 = vd[-1][0]
             d2 = vd[-1][1]
             v_max = v_min = (v1*d2 - v2*d1)/(d2 - d1)
-            v_max = min(v_max+1e-12, 1)
-            v_min = max(0, v_min-1e-12)
-        if(v_max == 0):
-            return None
+            v_max = min(v_max+1e-6, 1)
+            v_min = max(0, v_min-1e-6)
 
         #再帰を行う
         x0 = np.empty([0,2],float)
