@@ -104,7 +104,7 @@ class BezierPatch:
         V1 = self.d[self.norder][self.morder] - self.d[self.norder][0]
         L = Line.Line2D(np.array([0,0]), V0+V1)
 
-        self.Plot(self.getPlotColor()) #BezierPatchを描画 本番ではコメントアウト
+        #self.Plot(self.getPlotColor()) #BezierPatchを描画 本番ではコメントアウト
         #self.PlotDetail(L)
 
         ud = np.empty([0,2],float)
@@ -124,34 +124,41 @@ class BezierPatch:
             u_min = 0.
             for hp in hull_points:
                 if not prev_hp is None:
-                    u1 = prev_hp[0]
-                    d1 = prev_hp[1]
-                    u2 = hp[0]
-                    d2 = hp[1]
-                    
-                    if d1 == 0:
-                        u = u1
-                        if u_max < u:
+                    a = hp[1] - prev_hp[1]
+                    b = prev_hp[0] - hp[0]
+                    c = prev_hp[0]*hp[1] - hp[0]*prev_hp[1]
+                    if hp[1]*prev_hp[1] <= 0:
+                        X = np.array([
+                            [a,b],
+                            [0,1]
+                        ])
+                        P = np.array([
+                            [c],
+                            [0]
+                        ])
+                        ans = (np.linalg.inv(X) @ P).flatten()
+                        if u_max < ans[0]:
                             u_max, u_min = u_min, u_max
-                            u_max = u
+                            u_max = ans[0]
                         else:
-                            u_min = u
-                    elif d1*d2 < 0:
-                        u = (u1*d2 - u2*d1)/(d2 - d1)
-                        if u_max < u:
-                            u_max, u_min = u_min, u_max
-                            u_max = u
-                        else:
-                            u_min = u
+                            u_min = ans[0]
                 prev_hp = hp
             if u_max < u_min:
                 u_max, u_min = u_min, u_max
         else:
-            u1 = ud[0][0]
-            d1 = ud[0][1]
-            u2 = ud[-1][0]
-            d2 = ud[-1][1]
-            u_max = u_min = (u1*d2 - u2*d1)/(d2 - d1)
+            a = ud[0][1] - ud[-1][1]
+            b = ud[-1][0] - ud[0][0]
+            c = ud[-1][0]*ud[0][1] - ud[0][0]*ud[-1][1]
+            X = np.array([
+                [a,b],
+                [0,1]
+                ])
+            P = np.array([
+                [c],
+                [0]
+            ])
+            ans = (np.linalg.inv(X) @ P).flatten()
+            u_max = u_min = ans[0]
             u_max = min(u_max+1e-6, 1)
             u_min = max(0, u_min-1e-6)
 
@@ -174,7 +181,7 @@ class BezierPatch:
                 x = x.reshape([-1, 2])
                 x = x.dot(x1) + np.array([0.5, 0])
                 x0 = np.append(x0, x, axis=0)
-            
+
         else:
             div_patch, _ = self.divideU(u_max)
             _, div_patch = div_patch.divideU(u_min/u_max)
@@ -192,7 +199,7 @@ class BezierPatch:
         V1 = self.d[self.norder][self.morder] - self.d[0][self.morder]
         L = Line.Line2D(np.array([0,0]), V0+V1)
 
-        self.Plot(self.getPlotColor()) #BezierPatchを描画 本番ではコメントアウト
+        #self.Plot(self.getPlotColor()) #BezierPatchを描画 本番ではコメントアウト
         #self.PlotDetail(L)
 
         vd = np.empty([0,2],float)
@@ -212,34 +219,41 @@ class BezierPatch:
             v_min = 0.
             for hp in hull_points:
                 if not prev_hp is None:
-                    v1 = prev_hp[0]
-                    d1 = prev_hp[1]
-                    v2 = hp[0]
-                    d2 = hp[1]
-                    
-                    if d1 == 0:
-                        v = v1
-                        if v_max < v:
+                    a = hp[1] - prev_hp[1]
+                    b = prev_hp[0] - hp[0]
+                    c = prev_hp[0]*hp[1] - hp[0]*prev_hp[1]
+                    if hp[1]*prev_hp[1] <= 0:
+                        X = np.array([
+                            [a,b],
+                            [0,1]
+                        ])
+                        P = np.array([
+                            [c],
+                            [0]
+                        ])
+                        ans = (np.linalg.inv(X) @ P).flatten()
+                        if v_max < ans[0]:
                             v_max, v_min = v_min, v_max
-                            v_max = v
+                            v_max = ans[0]
                         else:
-                            v_min = v
-                    elif d1*d2 < 0:
-                        v = (v1*d2 - v2*d1)/(d2 - d1)
-                        if v_max < v:
-                            v_max, v_min = v_min, v_max
-                            v_max = v
-                        else:
-                            v_min = v
+                            v_min = ans[0]
                 prev_hp = hp
             if v_max < v_min:
                 v_max, v_min = v_min, v_max
         else:
-            v1 = vd[0][0]
-            d1 = vd[0][1]
-            v2 = vd[-1][0]
-            d2 = vd[-1][1]
-            v_max = v_min = (v1*d2 - v2*d1)/(d2 - d1)
+            a = vd[0][1] - vd[-1][1]
+            b = vd[-1][0] - vd[0][0]
+            c = vd[-1][0]*vd[0][1] - vd[0][0]*vd[-1][1]
+            X = np.array([
+                [a,b],
+                [0,1]
+                ])
+            P = np.array([
+                [c],
+                [0]
+            ])
+            ans = (np.linalg.inv(X) @ P).flatten()
+            v_max = v_min = ans[0]
             v_max = min(v_max+1e-6, 1)
             v_min = max(0, v_min-1e-6)
 
@@ -331,13 +345,10 @@ class BezierPatch:
         return [Q] + self._de_casteljau_algorithm(Q, t)
 
 def isHull(d):
-    for i in range(1, d.shape[1]):
-        for j in range(i+1, d.shape[1]):
-            vec1 = d[i] - d[0]
-            vec2 = d[j] - d[0]
-            length1 = np.linalg.norm(vec1)
-            length2 = np.linalg.norm(vec2)
-            if np.dot(vec1, vec2) != length1*length2:
+    for i in range(1, d.shape[0]):
+        for j in range(i+1, d.shape[0]):
+            vec1 = np.append((d[i] - d[0]),0)
+            vec2 = np.append((d[j] - d[0]),0)
+            if  np.linalg.norm(np.cross(vec1,vec2), ord=2) > 1.7*1e-12:
                 return True
     return False
-

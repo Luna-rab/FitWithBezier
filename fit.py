@@ -34,10 +34,14 @@ def deformat(points):
 def loss(surface_array, data_points):
     surface = BezierSurface(format(surface_array))
     sum_dist = 0
+    miss_num = 0
     for p in data_points:
-        sum_dist += dist_z(surface, p)**2
+        try:
+            sum_dist += dist_z(surface, p)**2
+        except:
+            miss_num += 1
     
-    return np.sqrt(sum_dist)/len(data_points)
+    return np.sqrt(sum_dist)/(len(data_points) - miss_num)
 
 if __name__ == '__main__':
     data_points = CSFDataRaw.cpd_ecc_cont1
