@@ -85,39 +85,20 @@ class Line3D:
 
     def intersectionPlane(self):
         h1 = np.cross(self.d, np.array([1+1e-3,1,1]))
-        h1 = h1/math.sqrt(np.sum(h1)**2)
+        h1 = h1/math.sqrt(np.sum(h1**2))
 
         h2 = np.cross(self.d, h1)
-        h2 = h2/math.sqrt(np.sum(h2)**2)
+        h2 = h2/math.sqrt(np.sum(h2**2))
 
         return Plane.Plane(h1, self.start), Plane.Plane(h2, self.start)
 
-    def Plot(self, ax, x_min=None, x_max=None, y_min=None, y_max=None):
-        if x_min == None:
-            x_min = min(self.start[0], self.end[0])
-        if x_max == None:
-            x_max = max(self.start[0], self.end[0])
-        if x_min > x_max:
-            x_min, x_max = x_max, x_min
-        if y_min == None:
-            y_min = min(self.start[1], self.end[1])
-        if y_max == None:
-            y_max = max(self.start[1], self.end[1])
-        if y_min > y_max:
-            y_min, y_max = y_max, y_min
-        
-        if self.d[0] == 0 or self.d[1] == 0:
-            t_max = max(self.start[2], self.end[2])/self.d[2]
-            t_min = min(self.start[2], self.end[2])/self.d[2]
-        else:
-            nums = [(x_min - self.start[0])/self.d[0], (y_min - self.start[1])/self.d[1], (x_max - self.start[0])/self.d[0], (y_max - self.start[1])/self.d[1]]
-            t_min = sorted(nums)[1]
-            t_max = sorted(nums)[2]
-        
+    def Plot(self, ax, l=None):
+        if l is None:
+            l = np.linalg.norm(self.start-self.end, ord=2)
         x = []
         y = []
         z = []
-        for t in np.linspace(t_min, t_max, 101):
+        for t in np.linspace(0, l, 101):
             x.append(self.Point(t)[0])
             y.append(self.Point(t)[1])
             z.append(self.Point(t)[2])

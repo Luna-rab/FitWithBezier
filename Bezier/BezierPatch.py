@@ -97,15 +97,17 @@ class BezierPatch:
         return color
 
     def Clip(self):
-        return self.ClipU(1,0)
+        return self.ClipU()
 
-    def ClipU(self, v_max, v_min):
+    def ClipU(self):
         V0 = self.d[0][self.morder] - self.d[0][0]
         V1 = self.d[self.norder][self.morder] - self.d[self.norder][0]
         L = Line.Line2D(np.array([0,0]), V0+V1)
 
-        #self.Plot(self.getPlotColor()) #BezierPatchを描画 本番ではコメントアウト
-        #self.PlotDetail(L)
+        x0 = np.empty([0,2],float)
+        if np.linalg.norm(self.d[0][0]-self.d[self.morder][self.norder] ,ord=2) + np.linalg.norm(self.d[self.morder][0]-self.d[0][self.norder] ,ord=2) < 1e-4:
+            x0 = np.append(x0, np.array([[0.5, 0.5]]), axis=0)
+            return x0
 
         ud = np.empty([0,2],float)
         for i in range(self.norder+1):
@@ -162,20 +164,15 @@ class BezierPatch:
             u_max = min(u_max+1e-6, 1)
             u_min = max(0, u_min-1e-6)
 
-        #再帰を行う
-        x0 = np.empty([0,2],float)
-        if math.sqrt(np.sum((self.d[0][0] - self.d[self.morder][self.norder])**2)) < 1e-4:
-            x0 = np.append(x0, np.array([[(u_max+u_min)/2, (v_max+v_min)/2]]), axis=0)
-            
-        elif 0.8 < u_max-u_min:
+        if 0.8 < u_max-u_min:
             div_patch1, div_patch2 = self.divideU(0.5)
-            x = div_patch1.ClipV(0.5, 0)
+            x = div_patch1.ClipV()
             if x is not None:
                 x1 = np.array([[0.5, 0],[0,1]])
                 x = x.reshape([-1, 2])
                 x = x.dot(x1) + np.array([0, 0])
                 x0 = np.append(x0, x, axis=0)
-            x = div_patch2.ClipV(1, 0.5)
+            x = div_patch2.ClipV()
             if x is not None:
                 x1 = np.array([[0.5, 0],[0,1]])
                 x = x.reshape([-1, 2])
@@ -185,22 +182,25 @@ class BezierPatch:
         else:
             div_patch, _ = self.divideU(u_max)
             _, div_patch = div_patch.divideU(u_min/u_max)
-            x = div_patch.ClipV(u_max, u_min)
+            x = div_patch.ClipV()
             if x is not None:
                 x1 = np.array([[u_max-u_min, 0],[0,1]])
                 x = x.reshape([-1, 2])
                 x = x.dot(x1) + np.array([u_min, 0])
                 x0 = np.append(x0, x, axis=0)
+        
         return x0
 
 
-    def ClipV(self, u_max, u_min):
+    def ClipV(self):
         V0 = self.d[self.norder][0] - self.d[0][0]
         V1 = self.d[self.norder][self.morder] - self.d[0][self.morder]
         L = Line.Line2D(np.array([0,0]), V0+V1)
 
-        #self.Plot(self.getPlotColor()) #BezierPatchを描画 本番ではコメントアウト
-        #self.PlotDetail(L)
+        x0 = np.empty([0,2],float)
+        if np.linalg.norm(self.d[0][0]-self.d[self.morder][self.norder] ,ord=2) + np.linalg.norm(self.d[self.morder][0]-self.d[0][self.norder] ,ord=2) < 1e-4:
+            x0 = np.append(x0, np.array([[0.5,0.5]]), axis=0)
+            return x0
 
         vd = np.empty([0,2],float)
         for i in range(self.norder+1):
@@ -257,20 +257,15 @@ class BezierPatch:
             v_max = min(v_max+1e-6, 1)
             v_min = max(0, v_min-1e-6)
 
-        #再帰を行う
-        x0 = np.empty([0,2],float)
-        if math.sqrt(np.sum((self.d[0][0] - self.d[self.morder][self.norder])**2)) < 1e-4:
-            x0 = np.append(x0, np.array([[(u_max+u_min)/2,(v_max+v_min)/2]]), axis=0)
-            
-        elif 0.8 < v_max-v_min:
+        if 0.8 < v_max-v_min:
             div_patch1, div_patch2 = self.divideV(0.5)
-            x = div_patch1.ClipU(0.5, 0)
+            x = div_patch1.ClipU()
             if x is not None:
                 x1 = np.array([[1,0],[0, 0.5]])
                 x = x.reshape([-1, 2])
                 x = x.dot(x1)
                 x0 = np.append(x0, x, axis=0)
-            x = div_patch2.ClipU(1, 0.5)
+            x = div_patch2.ClipU()
             if x is not None:
                 x1 = np.array([[1,0],[0, 0.5]])
                 x = x.reshape([-1, 2])
@@ -280,7 +275,7 @@ class BezierPatch:
         else:
             div_patch, _ = self.divideV(v_max)
             _, div_patch = div_patch.divideV(v_min/v_max)
-            x = div_patch.ClipU(v_max, v_min)
+            x = div_patch.ClipU()
             if x is not None:
                 x1 = np.array([[1,0],[0, v_max-v_min]])
                 x = x.reshape([-1, 2])

@@ -43,8 +43,26 @@ inv_params_2 = np.array([0.00210811,0.01215561,0.03185035068850417])
 inv_params_3 = np.array([-0.01084246,0.0111055,0.06634043335359993])
 inv_params_4 = np.array([1.73717213e-05,1.23275285e-02,0.03225697781216377])
 
+def getMatrix(lst):
+    mat = np.empty([0,3],float)
+    for l in lst:
+        mat = np.vstack((mat,l))
+    return mat
+
 def getColumnArray(lst, k):
     col = []
     for l in lst:
         col.append(l[k])
     return np.array(col)
+
+def procData(rawData):
+    Data = []
+    for p in rawData:
+        Data.append(np.array([np.log10(p[0]), p[1], np.log10(1./p[2])]))
+    return Data
+
+def Plot(ax, Data, c='blue'):
+    cpd = getColumnArray(Data,0)
+    ecc = getColumnArray(Data,1)
+    A = getColumnArray(Data,2)
+    ax.scatter(cpd, ecc, A, color=c ,linewidth=0.3)
